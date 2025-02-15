@@ -1,0 +1,13 @@
+{
+    "title": "Incidente de Prueba 3",
+    "description": "Se detectó otra fallo en el sistema de producción.",
+    "observacion": "El error se presenta de forma intermitente.",
+    "prioridad": "Alta",
+    "fecha_limite": "2025-02-05",
+    "user_id":1,
+    "asignado_por_id":2,
+    "asignado_a_id":3,
+    "estado_id": 1,
+    "tipo_incidencia_id": 1,
+    "comentario_solucion": "Pendiente de "
+}

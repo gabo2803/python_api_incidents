@@ -1,11 +1,12 @@
 from flask import request, jsonify, Blueprint
 from app.database import db
-from app.models import Incident
+from app.models import Incident, User
+from flask import current_app
+from flask_mail import Message
+from app.routes.auth import token_required
 
-# Definir el Blueprint
 incidents_bp = Blueprint("incidents", __name__)
 
-# ✅ Ruta para crear un incidente
 @incidents_bp.route("/incidents", methods=["POST"])
 def create_incident():
     data = request.json
@@ -14,20 +15,34 @@ def create_incident():
         description=data["description"],
         observacion=data["observacion"],
         prioridad=data["prioridad"],
-        fecha_limite =data["fecha_limite"],
+        fecha_limite=data["fecha_limite"],
         user_id=data["user_id"],
         asignado_por_id=data["asignado_por_id"],
-        asignado_a_id=data["asigna_a_id"],        
+        asignado_a_id=data["asignado_a_id"],        
         estado_id=data["estado_id"],
         tipo_incidencia_id=data["tipo_incidencia_id"],
-        comentario_solucion=data["comentario_solucion"]      
+        comentario_solucion=data["comentario_solucion"]
     )
     db.session.add(new_incident)
     db.session.commit()
+
+    user = User.query.get(data["user_id"])
+    # Enviar notificación por correo electrónico
+    mail = current_app.extensions['mail']
+    msg = Message(
+        subject="Nuevo Incidente Creado",
+        sender="ramirez.maradey@gmail.com",  # Reemplaza con el correo autorizado para enviar mensajes
+        recipients=[user.email]  # La dirección del usuario se coloca en una lista
+    )
+    msg.body = f"Se ha creado un nuevo incidente con el título: {new_incident.title}"
+    mail.send(msg)  # Aquí es donde corriges el error
+
     return jsonify({"message": "Incident created successfully"}), 201
+
 
 # ✅ Ruta para obtener todos los incidentes
 @incidents_bp.route("/incidents", methods=["GET"])
+#@token_required
 def get_incidents():
     incidents = Incident.query.all()
     return jsonify([{"id": inc.id, "title": inc.title, "description": inc.description , "observacion":inc.observacion,  "prioridad":inc.prioridad, "fecha_limite":inc.fecha_limite, "estado_id": inc.estado_id,
